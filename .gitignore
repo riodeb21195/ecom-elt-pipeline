@@ -1,0 +1,16 @@
+.env
+*.duckdb
+*.duckdb.wal
+__pycache__/
+*.pyc
+.pytest_cache/
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+staging_minio/_local_raw/
+extract/.checkpoints.json
+extract/.reference_schema.json
+.DS_Store
+.venv/
+venv/
+.ruff_cache/
