@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  mock_source_api:
+    build: ./mock_source_api
+    container_name: ecom_mock_source_api
+    ports:
+      - "8000:8000"
+    environment:
+      - RATE_LIMIT_PER_MINUTE=60
+      - SCHEMA_DRIFT_ENABLED=false
+    # Kein eigener healthcheck hier: python:3.11-slim hat kein curl installiert,
+    # ein curl-basierter Check wuerde hier faelschlich dauerhaft "unhealthy"
+    # anzeigen. Der Dockerfile definiert stattdessen einen funktionierenden
+    # HEALTHCHECK mit Pythons eigenem urllib (siehe mock_source_api/Dockerfile).
+
+  minio:
+    image: minio/minio:latest
+    container_name: ecom_minio
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    # Kein curl-basierter healthcheck: das offizielle minio/minio-Image bringt
+    # kein curl mit, der Check wuerde faelschlich immer fehlschlagen. Da kein
+    # anderer Service hier per depends_on auf "healthy" wartet, ist das rein
+    # kosmetisch -- MinIO selbst startet trotzdem normal.
+
+volumes:
+  minio_data:
