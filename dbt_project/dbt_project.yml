@@ -1,0 +1,21 @@
+name: 'ecom_elt_pipeline'
+version: '1.0.0'
+config-version: 2
+
+profile: 'ecom_elt_pipeline'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  ecom_elt_pipeline:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: table
+    marts:
+      +schema: marts
+      +materialized: incremental
+      +incremental_strategy: insert_overwrite

@@ -1,0 +1,30 @@
+# Kopiere zu ~/.dbt/profiles.yml (oder setze DBT_PROFILES_DIR).
+# Trennung dev/staging/prod ueber eigene DuckDB-Dateien bzw. Motherduck-Datenbanken --
+# so kann in dev frei experimentiert werden, ohne prod-Daten zu beruehren.
+
+ecom_elt_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: '../warehouse/ecom_dev.duckdb'
+      schema: dev
+
+    staging:
+      type: duckdb
+      path: '../warehouse/ecom_staging.duckdb'
+      schema: staging
+
+    prod:
+      type: duckdb
+      # Fuer eine gehostete Variante: motherduck-Pfad, z.B. 'md:ecom_prod?motherduck_token={{ env_var("MOTHERDUCK_TOKEN") }}'
+      path: '../warehouse/ecom.duckdb'
+      schema: prod
+
+    ci:
+      # Eigenes Target fuer CI: eigene Datei (nicht dev/prod-Datei), damit CI nie
+      # mit lokalen Entwicklungsdaten kollidiert. Muss auf dieselbe Datei zeigen,
+      # die load_orders.py in CI befuellt (siehe .github/workflows/ci.yml).
+      type: duckdb
+      path: '../warehouse/ecom_ci.duckdb'
+      schema: ci

@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: orders
+        description: "Unveraendertes Abbild der Orders wie vom Extract-Schritt geladen."
+        loaded_at_field: _loaded_at
+        freshness:
+          warn_after: {count: 26, period: hour}
+          error_after: {count: 50, period: hour}
+
+models:
+  - name: stg_orders
+    description: "Bereinigte, deduplizierte Orders. Eine Zeile pro order_id."
+    columns:
+      - name: order_id
+        description: "Primaerschluessel der Bestellung."
+        tests:
+          - unique
+          - not_null
+      - name: customer_state
+        tests:
+          - not_null
+      - name: product_category
+        tests:
+          - not_null
+      - name: order_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['delivered', 'shipped']
+      - name: order_purchase_timestamp
+        tests:
+          - not_null
+      - name: review_score
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 5
