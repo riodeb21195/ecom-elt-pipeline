@@ -1,9 +1,6 @@
 import json
-import os
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 CHECKPOINT_FILE = Path(__file__).parent / ".checkpoints.json"
 
@@ -12,13 +9,13 @@ CHECKPOINT_FILE = Path(__file__).parent / ".checkpoints.json"
 class RunMetadata:
     source: str
     started_at: str
-    finished_at: Optional[str]
+    finished_at: str | None
     rows_extracted: int
     status: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
-def get_last_checkpoint(source: str) -> Optional[str]:
+def get_last_checkpoint(source: str) -> str | None:
     if not CHECKPOINT_FILE.exists():
         return None
     data = json.loads(CHECKPOINT_FILE.read_text())

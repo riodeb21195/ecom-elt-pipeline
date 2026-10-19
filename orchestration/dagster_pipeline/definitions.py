@@ -15,9 +15,9 @@ from dagster import (
     AssetExecutionContext,
     Definitions,
     MetadataValue,
+    ScheduleDefinition,
     asset,
     define_asset_job,
-    ScheduleDefinition,
 )
 from dagster_dbt import DbtCliResource, dbt_assets
 
@@ -29,11 +29,11 @@ dbt_resource = DbtCliResource(project_dir=str(DBT_PROJECT_DIR))
 
 def _run_python_script(context: AssetExecutionContext, script_path: Path) -> None:
     result = subprocess.run(
-        [sys.executable, str(script_path)],
-        capture_output=True,
-        text=True,
-        cwd=str(REPO_ROOT),
-    )
+    [sys.executable, str(script_path)],
+    capture_output=True,
+    text=True,
+    check=False,
+)
     context.log.info(result.stdout)
     if result.returncode != 0:
         context.log.error(result.stderr)

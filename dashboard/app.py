@@ -38,7 +38,7 @@ st.caption(
 
 try:
     df = load_data()
-except Exception as e:
+except duckdb.Error as e:
     st.error(
         f"Konnte Warehouse nicht lesen ({e}). "
         f"Erst `dbt build` in dbt_project/ ausführen, damit dev_marts.mart_delivery_performance existiert."

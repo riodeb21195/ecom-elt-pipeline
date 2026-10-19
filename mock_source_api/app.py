@@ -1,8 +1,7 @@
 import os
 import random
 import time
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 from fastapi import FastAPI, HTTPException, Query, Request
 
@@ -13,7 +12,7 @@ SCHEMA_DRIFT_ENABLED = os.environ.get("SCHEMA_DRIFT_ENABLED", "false").lower() =
 TRANSIENT_ERROR_RATE = float(os.environ.get("TRANSIENT_ERROR_RATE", "0.03"))
 
 _request_log: list[float] = []
-_orders_cache: Optional[list[dict]] = None
+_orders_cache: list[dict] | None = None
 
 def _rate_limit_check():
     now = time.time()
@@ -29,7 +28,7 @@ def _generate_orders(n: int = 500) -> list[dict]:
     categories = ["electronics", "furniture", "toys", "beauty", "sports", "books"]
     states = ["SP", "RJ", "MG", "BA", "RS", "PR"]
     orders = []
-    base_time = datetime(2024, 1, 1)
+    base_time = datetime(2024, 1, 1, tzinfo=timezone.utc)
     for i in range(n):
         order_ts = base_time + timedelta(hours= i * 3, minutes=random.randint(0,59))
         delivered_offset_days = random.choice([2,3,4,5,7,10,14])
@@ -65,7 +64,7 @@ def get_orders(
     request: Request,
     limit: int = Query(100, le=500),
     offset: int = Query(0, ge=0),
-    updated_after: Optional[str] = Query(None, description="ISO timestamp, inkr. Extraktion"),
+    updated_after: str | None = Query(None, description="ISO timestamp, inkr. Extraktion"),
 ):
     _rate_limit_check()
 
