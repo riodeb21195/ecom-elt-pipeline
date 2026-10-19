@@ -34,3 +34,6 @@ CREATE TABLE IF NOT EXISTS raw.orders (
     _loaded_at                     TIMESTAMP DEFAULT current_timestamp,
     _load_run_id                   VARCHAR
 );
+
+ALTER TABLE pipeline_metadata.load_runs
+ADD COLUMN IF NOT EXISTS file_sha256 VARCHAR;
