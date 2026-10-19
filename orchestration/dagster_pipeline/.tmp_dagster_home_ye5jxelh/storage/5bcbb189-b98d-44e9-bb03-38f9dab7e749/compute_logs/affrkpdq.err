@@ -1,0 +1,7 @@
+[32m2026-10-19 21:20:29 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - 2046 - LOGS_CAPTURED - Capturing logs for process (pid: 2046).
+[32m2026-10-19 21:20:29 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - 2046 - staged_orders_in_minio - STEP_START - Started execution of step "staged_orders_in_minio".
+[32m2026-10-19 21:20:31 +0200[0m - dagster - [34mINFO[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - staged_orders_in_minio - [staging] Uploaded /Users/josefdebase/ecom-elt-pipeline/staging_minio/_local_raw/orders_initial.parquet -> s3://raw/orders/orders_initial.parquet
+
+[32m2026-10-19 21:20:31 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - 2046 - staged_orders_in_minio - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
+[32m2026-10-19 21:20:31 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - 2046 - staged_orders_in_minio - ASSET_MATERIALIZATION - Materialized value staged_orders_in_minio.
+[32m2026-10-19 21:20:31 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 5bcbb189-b98d-44e9-bb03-38f9dab7e749 - 2046 - staged_orders_in_minio - STEP_SUCCESS - Finished execution of step "staged_orders_in_minio" in 2.08s.

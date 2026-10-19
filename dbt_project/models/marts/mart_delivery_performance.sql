@@ -8,8 +8,8 @@
 {{
     config(
         materialized='incremental',
-        incremental_strategy='insert_overwrite',
-        partition_by=['purchase_month']
+        incremental_strategy='delete+insert',
+        unique_key=['purchase_month', 'customer_state', 'product_category']
     )
 }}
 

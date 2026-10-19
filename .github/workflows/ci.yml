@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint
+        run: ruff check extract/ warehouse/ orchestration/ staging_minio/ mock_source_api/ dashboard/
+
+      - name: Unit tests (extract logic, schema drift, checkpointing)
+        run: pytest tests/unit -v
+
+  dbt-build:
+    runs-on: ubuntu-latest
+    needs: lint-and-unit-tests
+    env:
+      WAREHOUSE_PATH: ./warehouse/ecom_ci.duckdb
+      SOURCE_API_BASE_URL: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          cd dbt_project && dbt deps
+
+      - name: Set up dbt profile for CI
+        run: |
+          mkdir -p ~/.dbt
+          cp dbt_project/profiles.yml.example ~/.dbt/profiles.yml
+
+      # dbt build braucht eine befuellte raw.orders-Tabelle -- dafuer hier
+      # dieselbe Extract->Load-Kette wie lokal, nur gegen die lokal gestartete
+      # Mock-API statt gegen Docker Compose (kein Docker-in-Docker noetig).
+      - name: Start mock source API
+        run: |
+          cd mock_source_api
+          nohup uvicorn app:app --host 0.0.0.0 --port 8000 &
+          for i in $(seq 1 10); do
+            curl -sf http://localhost:8000/health && break
+            sleep 2
+          done
+
+      - name: Extract and load into CI warehouse
+        run: |
+          python extract/extract_orders.py
+          python warehouse/load_orders.py
+
+      - name: dbt build against the populated CI warehouse
+        run: |
+          cd dbt_project
+          dbt build --target ci
+
+      - name: Upload dbt docs artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-docs
+          path: dbt_project/target

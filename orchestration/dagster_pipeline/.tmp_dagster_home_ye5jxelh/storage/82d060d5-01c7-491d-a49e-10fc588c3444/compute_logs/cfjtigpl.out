@@ -1,0 +1,36 @@
+Running with dbt=1.12.5
+Registered adapter: duckdb=1.11.0
+Found 3 models, 9 data tests, 1 source, 616 macros
+
+Concurrency: 1 threads (target='dev')
+
+1 of 12 START sql view model dev_staging.stg_orders ............................ [RUN]
+1 of 12 OK created sql view model dev_staging.stg_orders ....................... [[32mOK[0m in 0.52s]
+2 of 12 START test accepted_values_stg_orders_order_status__delivered__shipped . [RUN]
+2 of 12 PASS accepted_values_stg_orders_order_status__delivered__shipped ....... [[32mPASS[0m in 0.36s]
+3 of 12 START test assert_no_future_orders ..................................... [RUN]
+3 of 12 PASS assert_no_future_orders ........................................... [[32mPASS[0m in 0.13s]
+4 of 12 START test dbt_utils_accepted_range_stg_orders_review_score__5__1 ...... [RUN]
+4 of 12 PASS dbt_utils_accepted_range_stg_orders_review_score__5__1 ............ [[32mPASS[0m in 0.13s]
+5 of 12 START test not_null_stg_orders_customer_state .......................... [RUN]
+5 of 12 PASS not_null_stg_orders_customer_state ................................ [[32mPASS[0m in 0.37s]
+6 of 12 START test not_null_stg_orders_order_id ................................ [RUN]
+6 of 12 PASS not_null_stg_orders_order_id ...................................... [[32mPASS[0m in 0.11s]
+7 of 12 START test not_null_stg_orders_order_purchase_timestamp ................ [RUN]
+7 of 12 PASS not_null_stg_orders_order_purchase_timestamp ...................... [[32mPASS[0m in 0.12s]
+8 of 12 START test not_null_stg_orders_order_status ............................ [RUN]
+8 of 12 PASS not_null_stg_orders_order_status .................................. [[32mPASS[0m in 0.09s]
+9 of 12 START test not_null_stg_orders_product_category ........................ [RUN]
+9 of 12 PASS not_null_stg_orders_product_category .............................. [[32mPASS[0m in 0.10s]
+10 of 12 START test unique_stg_orders_order_id ................................. [RUN]
+10 of 12 PASS unique_stg_orders_order_id ....................................... [[32mPASS[0m in 0.12s]
+11 of 12 START sql table model dev_intermediate.int_orders_with_delay_flags .... [RUN]
+11 of 12 OK created sql table model dev_intermediate.int_orders_with_delay_flags  [[32mOK[0m in 0.40s]
+12 of 12 START sql incremental model dev_marts.mart_delivery_performance ....... [RUN]
+12 of 12 OK created sql incremental model dev_marts.mart_delivery_performance .. [[32mOK[0m in 0.45s]
+
+Finished running 1 incremental model, 1 table model, 9 data tests, 1 view model in 0 hours 0 minutes and 4.03 seconds (4.03s).
+
+[32mCompleted successfully[0m
+
+Done. PASS=12 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=12
