@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 import requests
@@ -93,7 +93,7 @@ def _checkpoint_to_slug(checkpoint: str | None) -> str:
 
 
 def main():
-    run_started_at = datetime.now(timezone.utc)
+    run_started_at = datetime.now(UTC)
     last_checkpoint = get_last_checkpoint(SOURCE)
     run_id = _checkpoint_to_slug(last_checkpoint)
 
@@ -117,7 +117,7 @@ def main():
         metadata = RunMetadata(
             source=SOURCE,
             started_at=run_started_at.isoformat(),
-            finished_at=datetime.now(timezone.utc).isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
             rows_extracted=len(records),
             status="success",
         )
@@ -127,7 +127,7 @@ def main():
         metadata = RunMetadata(
             source=SOURCE,
             started_at=run_started_at.isoformat(),
-            finished_at=datetime.now(timezone.utc).isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
             rows_extracted=0,
             status="failed",
             error=str(e),
@@ -142,7 +142,7 @@ def main():
         metadata = RunMetadata(
             source=SOURCE,
             started_at=run_started_at.isoformat(),
-            finished_at=datetime.now(timezone.utc).isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
             rows_extracted=0,
             status="failed",
             error=str(e),

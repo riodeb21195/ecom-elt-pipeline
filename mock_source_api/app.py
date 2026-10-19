@@ -1,7 +1,7 @@
 import os
 import random
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import FastAPI, HTTPException, Query, Request
 
@@ -28,7 +28,7 @@ def _generate_orders(n: int = 500) -> list[dict]:
     categories = ["electronics", "furniture", "toys", "beauty", "sports", "books"]
     states = ["SP", "RJ", "MG", "BA", "RS", "PR"]
     orders = []
-    base_time = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    base_time = datetime(2024, 1, 1, tzinfo=UTC)
     for i in range(n):
         order_ts = base_time + timedelta(hours= i * 3, minutes=random.randint(0,59))
         delivered_offset_days = random.choice([2,3,4,5,7,10,14])

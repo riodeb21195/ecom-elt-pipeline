@@ -2,7 +2,7 @@ import glob
 import hashlib
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import duckdb
 import pandas as pd
@@ -61,7 +61,7 @@ def _checksum_file(filepath: str) -> str:
 
 def load_file(con: duckdb.DuckDBPyConnection, filepath: str) -> None:
     load_run_id = str(uuid.uuid4())
-    started_at = datetime.now(timezone.utc)
+    started_at = datetime.now(UTC)
 
     source_row_count = len(pd.read_parquet(filepath))
     checksum = _checksum_file(filepath)
@@ -133,7 +133,7 @@ def load_file(con: duckdb.DuckDBPyConnection, filepath: str) -> None:
                 row_count_check,
                 checksum,
                 started_at,
-                datetime.now(timezone.utc),
+                datetime.now(UTC),
                 "success",
                 None,
                 file_sha,
@@ -162,7 +162,7 @@ def load_file(con: duckdb.DuckDBPyConnection, filepath: str) -> None:
                 False,
                 checksum,
                 started_at,
-                datetime.now(timezone.utc),
+                datetime.now(UTC),
                 "failed",
                 str(e),
                 file_sha,
