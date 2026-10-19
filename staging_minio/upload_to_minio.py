@@ -16,6 +16,7 @@ LOCAL_RAW_DIR = os.path.join(os.path.dirname(__file__), "_local_raw")
 
 
 def get_client():
+    """Erstellt einen Client für den Zugriff auf MinIO."""
     return boto3.client(
         "s3",
         endpoint_url=f"http://{MINIO_ENDPOINT}",
@@ -26,23 +27,38 @@ def get_client():
     )
 
 
-def ensure_bucket(client, bucket: str):
+def ensure_bucket(client, bucket: str) -> None:
+    """Erstellt den Bucket, falls er noch nicht existiert."""
     existing = [b["Name"] for b in client.list_buckets()["Buckets"]]
+
     if bucket not in existing:
         client.create_bucket(Bucket=bucket)
+        print(f"[staging] Created bucket: {bucket}")
 
 
-def upload_pending_files():
+def upload_pending_files() -> None:
+    """Lädt lokale Parquet-Dateien in den Raw-Bucket hoch."""
     client = get_client()
     ensure_bucket(client, BUCKET_RAW)
 
-    files = sorted(glob.glob(os.path.join(LOCAL_RAW_DIR, "orders_*.parquet")))
+    files = sorted(
+        glob.glob(os.path.join(LOCAL_RAW_DIR, "orders_*.parquet"))
+    )
+
+    if not files:
+        print("[staging] No local Parquet files found.")
+        return
+
     for filepath in files:
         key = f"orders/{os.path.basename(filepath)}"
+
         client.upload_file(filepath, BUCKET_RAW, key)
-        print(f"[staging] Uploaded {filepath} -> s3://{BUCKET_RAW}/{key}")
+
+        print(
+            f"[staging] Uploaded {filepath} "
+            f"-> s3://{BUCKET_RAW}/{key}"
+        )
 
 
 if __name__ == "__main__":
     upload_pending_files()
-

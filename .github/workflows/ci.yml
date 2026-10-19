@@ -1,3 +1,4 @@
+```yaml
 name: CI
 
 on:
@@ -9,6 +10,7 @@ on:
 jobs:
   lint-and-unit-tests:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +30,31 @@ jobs:
   dbt-build:
     runs-on: ubuntu-latest
     needs: lint-and-unit-tests
+
     env:
       WAREHOUSE_PATH: ./warehouse/ecom_ci.duckdb
       SOURCE_API_BASE_URL: http://localhost:8000
+      MINIO_ENDPOINT: localhost:9000
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BUCKET_RAW: raw
+
+    services:
+      minio:
+        image: minio/minio:latest
+        ports:
+          - 9000:9000
+          - 9001:9001
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        command: server /data --console-address ":9001"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -48,22 +72,40 @@ jobs:
           mkdir -p ~/.dbt
           cp dbt_project/profiles.yml.example ~/.dbt/profiles.yml
 
-      # dbt build braucht eine befuellte raw.orders-Tabelle -- dafuer hier
-      # dieselbe Extract->Load-Kette wie lokal, nur gegen die lokal gestartete
-      # Mock-API statt gegen Docker Compose (kein Docker-in-Docker noetig).
+      - name: Wait for MinIO
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live; then
+              echo "MinIO is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MinIO did not become ready in time."
+          exit 1
+
       - name: Start mock source API
         run: |
           cd mock_source_api
           nohup uvicorn app:app --host 0.0.0.0 --port 8000 &
-          for i in $(seq 1 10); do
-            curl -sf http://localhost:8000/health && break
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8000/health; then
+              echo "Mock API is ready."
+              exit 0
+            fi
             sleep 2
           done
+          echo "Mock API did not become ready in time."
+          exit 1
 
-      - name: Extract and load into CI warehouse
-        run: |
-          python extract/extract_orders.py
-          python warehouse/load_orders.py
+      - name: Extract orders
+        run: python extract/extract_orders.py
+
+      - name: Upload extracted files to MinIO
+        run: python staging_minio/upload_to_minio.py
+
+      - name: Load orders from MinIO into DuckDB
+        run: python warehouse/load_orders.py
 
       - name: dbt build against the populated CI warehouse
         run: |
@@ -76,3 +118,4 @@ jobs:
         with:
           name: dbt-docs
           path: dbt_project/target
+```
