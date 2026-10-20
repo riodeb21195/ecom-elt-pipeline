@@ -1,120 +1,50 @@
 # E-Commerce ELT Pipeline
 
-Ein End-to-End-Data-Engineering-Projekt zur Verarbeitung und Analyse von E-Commerce-Bestellungen.
+Ein End-to-End-Data-Engineering-Projekt, das Bestelldaten über eine simulierte REST-API extrahiert, als Parquet-Dateien in MinIO speichert, in DuckDB lädt, mit dbt transformiert und den gesamten Ablauf mit Dagster orchestriert.
 
-Die Pipeline ruft Bestelldaten über eine REST-API ab, speichert Rohdaten im Objektspeicher MinIO, lädt sie in ein analytisches Data Warehouse mit DuckDB und transformiert sie mit dbt. Dagster orchestriert den Workflow, während ein Streamlit-Dashboard die Analyse der Lieferperformance ermöglicht.
+Das Projekt demonstriert eine vollständige ELT-Pipeline mit Checkpointing, Erkennung von Schemaänderungen, Datentests und einem Streamlit-Dashboard.
 
-Das Projekt demonstriert zentrale Data-Engineering-Konzepte anhand einer lokal ausführbaren Pipeline.
+## Architektur
 
-## Projektziele
+```mermaid
+flowchart LR
+    A[Mock Source API<br/>FastAPI] --> B[Extraktion<br/>Python]
+    B --> C[Lokale Parquet-Dateien]
+    C --> D[MinIO<br/>Raw Bucket]
+    D --> E[Laden<br/>DuckDB]
+    E --> F[Transformation<br/>dbt]
+    F --> G[Dashboard<br/>Streamlit]
 
-- Aufbau einer modularen ELT-Pipeline
-- Zuverlässige Datenextraktion mit Checkpoints und Wiederholungsversuchen
-- Speicherung von Rohdaten im Parquet-Format
-- Transformation und Modellierung mit SQL und dbt
-- Automatisierte Datenqualitätsprüfungen
-- Orchestrierung mit Dagster
-- Visualisierung von Kennzahlen mit Streamlit
-- Containerisierung der benötigten Services und automatisierte CI-Prüfungen
-
-## Architektur im Überblick
-
-```text
-REST-API (FastAPI)
-       |
-       v
-Python-Extraktion
-Checkpoints, Retries,
-Schemaänderungen prüfen
-       |
-       v
-MinIO
-Rohdaten im Parquet-Format
-       |
-       v
-DuckDB
-Raw Layer
-       |
-       v
-dbt
-Staging -> Intermediate -> Marts
-       |
-       v
-Dagster
-Orchestrierung des Workflows
-       |
-       v
-Streamlit
-Dashboard zur Lieferperformance
+    H[Dagster] -. Orchestrierung .-> B
+    H -. Orchestrierung .-> D
+    H -. Orchestrierung .-> E
+    H -. Orchestrierung .-> F
 ```
 
-Eine ausführlichere Beschreibung findest du in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+## Verwendete Technologien
 
-## Technologie-Stack
+- **Python** – Extraktion, Laden und Pipeline-Logik
+- **FastAPI** – simulierte Quell-API
+- **MinIO** – S3-kompatibler Objektspeicher für Parquet-Dateien
+- **DuckDB** – analytisches Data Warehouse
+- **dbt** – SQL-Transformationen und Datentests
+- **Dagster** – Orchestrierung der Pipeline
+- **Streamlit** – Dashboard zur Datenanalyse
+- **Docker Compose** – Verwaltung der lokalen Services
+- **pytest** – automatisierte Tests
 
-| Technologie | Einsatz im Projekt |
-|---|---|
-| Python | Datenextraktion und Pipeline-Logik |
-| FastAPI | Bereitstellung der simulierten REST-API |
-| MinIO | Speicherung der Rohdaten als Objekte |
-| Parquet | Spaltenorientiertes Dateiformat für Rohdaten |
-| DuckDB | Analytisches Data Warehouse |
-| SQL und dbt | Transformationen, Datenmodellierung und Tests |
-| Dagster | Orchestrierung und Überwachung der Pipeline |
-| Streamlit | Interaktives Dashboard |
-| Docker Compose | Lokaler Betrieb der Services |
-| GitHub Actions | Automatisierte CI-Prüfungen |
+## Voraussetzungen
 
-## Zentrale Funktionen
-
-### Datenextraktion
-
-- Abruf von Bestellungen über eine REST-API
-- Checkpoints zur Fortsetzung der Extraktion
-- Wiederholungsversuche bei vorübergehenden Fehlern und Rate Limits
-- Prüfung auf Veränderungen des API-Schemas
-
-### Speicherung und Data Warehouse
-
-- Ablage der extrahierten Rohdaten als Parquet-Dateien in MinIO
-- Laden der Daten in DuckDB
-- Trennung zwischen Rohdaten und transformierten Datenmodellen
-
-### Transformation und Datenqualität
-
-Die dbt-Modelle sind in drei Schichten organisiert:
-
-1. **Staging:** Aufbereitung und Vereinheitlichung der Quelldaten
-2. **Intermediate:** Ableitung von Merkmalen zur Lieferverzögerung
-3. **Marts:** Aggregierte Kennzahlen für die Analyse der Lieferperformance
-
-Datenqualitätstests prüfen unter anderem Pflichtfelder, eindeutige Bestell-IDs, erlaubte Werte und Bestelldaten in der Zukunft.
-
-### Orchestrierung und Visualisierung
-
-Dagster steuert die Pipeline über einen zentralen Workflow. Das Streamlit-Dashboard stellt ausgewählte Kennzahlen zur Lieferperformance bereit.
-
-## Testergebnisse
-
-Die Pipeline wurde in der lokalen Entwicklungsumgebung erfolgreich ausgeführt.
-
-- **Dagster:** erfolgreicher Lauf des Jobs `full_elt_pipeline`
-- **dbt:** 9 erfolgreiche Datentests
-- **Rohdaten:** 500 Bestellungen
-- **Staging-Modell:** 500 Bestellungen
-- **Eindeutige Bestell-IDs:** 500 in beiden Schichten
-- **Kennzahlenabgleich:** Die Anzahl der analysierten Bestellungen und der verspäteten Lieferungen stimmte zwischen Intermediate-Modell und Mart überein.
-
-Die Ergebnisse beziehen sich auf den getesteten lokalen Datenbestand. Sie stellen keinen Nachweis für einen produktiven Betrieb dar.
-
-## Projekt lokal ausführen
-
-### Voraussetzungen
+Installiere folgende Programme:
 
 - Git
-- Docker Desktop mit Docker Compose
-- Python in einer zur Projektkonfiguration passenden Version
-- Installierte Projektabhängigkeiten
+- Docker Desktop
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/)
+
+Starte Docker Desktop und warte, bis es vollständig läuft.
+
+## Installation und Inbetriebnahme
 
 ### 1. Repository klonen
 
@@ -123,91 +53,225 @@ git clone https://github.com/riodeb21195/ecom-elt-pipeline.git
 cd ecom-elt-pipeline
 ```
 
-### 2. Umgebungsvariablen konfigurieren
+### 2. Python-Umgebung einrichten
+
+Erstelle eine virtuelle Umgebung und aktiviere sie:
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+Unter Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Installiere die Abhängigkeiten:
+
+```bash
+uv pip install -r requirements.txt
+```
+
+### 3. Umgebungsvariablen konfigurieren
+
+Erstelle aus der Vorlage deine lokale Konfigurationsdatei:
 
 ```bash
 cp .env.example .env
 ```
 
-Prüfe die benötigten Umgebungsvariablen in `.env.example` und passe die lokale Konfiguration bei Bedarf an. Zugangsdaten gehören nicht in das öffentliche Repository.
+Die Datei `.env.example` enthält die Konfigurationsvorlage. Passe die Werte bei Bedarf an deine lokale Umgebung an.
 
-### 3. Services starten
+### 4. Docker-Services starten
+
+Führe die folgenden Befehle im Projektverzeichnis aus:
 
 ```bash
 docker compose up -d
 docker compose ps
 ```
 
-Prüfe, ob die benötigten Container laufen. Die simulierte API lässt sich bei laufendem Service beispielsweise mit folgendem Befehl prüfen:
+Damit werden die in `docker-compose.yml` definierten Services gestartet.
 
-```bash
-curl http://localhost:8000/health
-```
+Die MinIO-Konsole erreichst du unter:
 
-### 4. Python-Abhängigkeiten installieren
+http://localhost:9001
 
-Richte die Python-Umgebung entsprechend der Projektkonfiguration ein und installiere die benötigten Abhängigkeiten aus der vorgesehenen Dependency-Datei.
+Die Standard-Zugangsdaten der lokalen Entwicklungsumgebung sind `minioadmin` / `minioadmin`, sofern sie nicht in deiner Konfiguration geändert wurden.
 
-### 5. Dagster starten
+## Pipeline mit Dagster ausführen
 
-Führe den Befehl im Projektstammverzeichnis aus:
+Stelle sicher, dass du dich im Projektverzeichnis befindest und die virtuelle Python-Umgebung aktiviert ist.
+
+Starte Dagster mit:
 
 ```bash
 dagster dev -f orchestration/dagster_pipeline/definitions.py
 ```
 
-Öffne anschließend [http://localhost:3000](http://localhost:3000) und starte den Job `full_elt_pipeline`.
+Öffne anschließend die Dagster-Oberfläche:
 
-### 6. Dashboard starten
+http://localhost:3000
 
-Öffne ein separates Terminal im Projektverzeichnis:
+Wähle den Job `full_elt_pipeline` aus und starte einen Pipeline-Lauf.
+
+Lass das Terminal geöffnet, solange Dagster läuft.
+
+## Dashboard starten
+
+Öffne ein zweites Terminal im Projektverzeichnis:
 
 ```bash
+source .venv/bin/activate
 streamlit run dashboard/app.py
 ```
 
-Das Dashboard ist anschließend normalerweise unter [http://localhost:8501](http://localhost:8501) erreichbar.
+Unter Windows aktivierst du die Umgebung mit:
 
-### 7. Datenqualität und Unit-Tests prüfen
-
-Führe dbt-Befehle im passenden dbt-Projektverzeichnis und mit der vorgesehenen Profilkonfiguration aus:
-
-```bash
-dbt build
+```powershell
+.venv\Scripts\activate
 ```
 
-Die Python-Unit-Tests werden vom Projektstammverzeichnis aus gestartet:
+Das Dashboard erreichst du unter:
+
+http://localhost:8501
+
+## Pipeline manuell ausführen
+
+Alternativ kannst du die einzelnen Pipeline-Schritte nacheinander ausführen. Führe die Befehle grundsätzlich vom Projektverzeichnis aus.
+
+### 1. Docker-Services starten
+
+Falls noch nicht geschehen:
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+### 2. Bestelldaten extrahieren
+
+```bash
+python extract/extract_orders.py
+```
+
+Die Extraktion ruft Bestelldaten über die simulierte API ab und schreibt Parquet-Dateien in die lokale Staging-Umgebung. Zusätzlich werden Checkpoints und Schemaänderungen behandelt.
+
+### 3. Daten nach MinIO hochladen
+
+```bash
+python staging_minio/upload_to_minio.py
+```
+
+Die erzeugten Parquet-Dateien werden in MinIO abgelegt.
+
+### 4. Daten in DuckDB laden
+
+```bash
+python warehouse/load_orders.py
+```
+
+Der Loader liest die Parquet-Daten aus MinIO und lädt sie in das lokale DuckDB-Data-Warehouse.
+
+### 5. Daten mit dbt transformieren
+
+Erstelle das lokale dbt-Konfigurationsverzeichnis, falls es noch nicht existiert:
+
+```bash
+mkdir -p ~/.dbt
+```
+
+Wenn noch keine Datei `~/.dbt/profiles.yml` vorhanden ist, kopiere die bereitgestellte Vorlage:
+
+```bash
+cp dbt_project/profiles.yml.example ~/.dbt/profiles.yml
+```
+
+Falls bereits eine `profiles.yml` existiert, prüfe sie zuerst, bevor du sie überschreibst.
+
+Führe anschließend dbt aus:
+
+```bash
+cd dbt_project
+dbt deps
+dbt build
+cd ..
+```
+
+`dbt build` führt die konfigurierten Modelle und Tests aus.
+
+## Tests ausführen
+
+Führe im Projektverzeichnis folgenden Befehl aus:
 
 ```bash
 pytest tests/unit -v
 ```
 
-**Hinweis:** Die Schritte beschreiben den vorgesehenen lokalen Ablauf. Vor einer vollständigen Reproduzierbarkeitszusage müssen insbesondere Abhängigkeiten, dbt-Profil, Umgebungsvariablen und der gesamte Startprozess auf einer frischen Umgebung geprüft werden.
+Damit werden die Unit-Tests mit ausführlicher Ausgabe gestartet.
 
 ## Projektstruktur
 
 ```text
 ecom-elt-pipeline/
-├── README.md
-├── ARCHITECTURE.md
-├── docker-compose.yml
-├── .env.example
-├── requirements.txt
-├── mock_source_api/
-├── extract/
-├── staging_minio/
-├── warehouse/
-├── dbt_project/
-├── orchestration/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── dashboard/
+│   └── app.py
+├── dbt_project/
+│   ├── models/
+│   │   ├── staging/
+│   │   ├── intermediate/
+│   │   └── marts/
+│   ├── tests/
+│   ├── dbt_project.yml
+│   └── profiles.yml.example
+├── extract/
+│   ├── checkpoint_store.py
+│   ├── schema_drift_check.py
+│   └── extract_orders.py
+├── mock_source_api/
+│   ├── app.py
+│   └── Dockerfile
+├── orchestration/
+│   └── dagster_pipeline/
+│       ├── alerts.py
+│       └── definitions.py
+├── staging_minio/
+│   └── upload_to_minio.py
 ├── tests/
-└── .github/workflows/
+│   └── unit/
+│       └── test_extract.py
+├── warehouse/
+│   ├── init.sql
+│   └── load_orders.py
+├── .env.example
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
 ```
 
-Die technische Aufteilung der Komponenten wird in der [Architekturdokumentation](ARCHITECTURE.md) erläutert.
+## Docker-Services beenden
 
-## Projektstatus
+Um die Services zu stoppen, ohne die gespeicherten Docker-Volumes gezielt zu löschen:
 
-Portfolio-Projekt mit Fokus auf Datenextraktion, ELT, analytische Datenmodellierung, Datenqualität und Workflow-Orchestrierung.
+```bash
+docker compose down
+```
 
-**Repository:** [riodeb21195/ecom-elt-pipeline](https://github.com/riodeb21195/ecom-elt-pipeline)
+Um zusätzlich die zugehörigen Docker-Volumes zu löschen:
+
+```bash
+docker compose down -v
+```
+
+**Achtung:** Der zweite Befehl entfernt die von Docker Compose verwalteten Volumes und die darin gespeicherten Daten. Verwende ihn nur, wenn du deine lokale Umgebung bewusst zurücksetzen möchtest.
+
+## Hinweise
+
+- Die lokale Datei `.env` enthält Konfigurationen und sollte nicht in Git eingecheckt werden.
+- Die DuckDB-Datenbank und lokal erzeugte Parquet-Dateien können während der Ausführung entstehen. Ein frischer Klon sollte nicht von bereits vorhandenen Laufzeitdaten abhängen.
+- Die angegebenen Dagster-, dbt- und Dashboard-Befehle sind für die Ausführung vom Projektverzeichnis aus dokumentiert.
