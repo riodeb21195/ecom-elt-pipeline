@@ -6,8 +6,8 @@ tenacity>=8.2
 boto3>=1.34
 duckdb>=0.10
 dbt-duckdb>=1.7
-dagster>=1.7
-dagster-dbt>=0.23
+dagster==1.12.8
+dagster-dbt==0.28.8
 fastapi>=0.110
 uvicorn[standard]>=0.29
 pytest>=8.0
