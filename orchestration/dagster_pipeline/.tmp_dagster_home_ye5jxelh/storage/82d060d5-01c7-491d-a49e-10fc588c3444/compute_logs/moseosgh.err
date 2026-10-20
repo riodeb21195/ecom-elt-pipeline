@@ -1,7 +1,0 @@
-[32m2026-10-19 21:27:25 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - 2595 - LOGS_CAPTURED - Capturing logs for process (pid: 2595).
-[32m2026-10-19 21:27:25 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - 2595 - orders_loaded_to_warehouse - STEP_START - Started execution of step "orders_loaded_to_warehouse".
-[32m2026-10-19 21:27:28 +0200[0m - dagster - [34mINFO[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - orders_loaded_to_warehouse - [load] SKIP orders_initial.parquet: gleicher Inhalt bereits erfolgreich geladen
-
-[32m2026-10-19 21:27:28 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - 2595 - orders_loaded_to_warehouse - STEP_OUTPUT - Yielded output "result" of type "Nothing". (Type check passed).
-[32m2026-10-19 21:27:28 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - 2595 - orders_loaded_to_warehouse - ASSET_MATERIALIZATION - Materialized value orders_loaded_to_warehouse.
-[32m2026-10-19 21:27:28 +0200[0m - dagster - [34mDEBUG[0m - full_elt_pipeline - 82d060d5-01c7-491d-a49e-10fc588c3444 - 2595 - orders_loaded_to_warehouse - STEP_SUCCESS - Finished execution of step "orders_loaded_to_warehouse" in 3.47s.

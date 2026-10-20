@@ -10,8 +10,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-WAREHOUSE_PATH = os.environ.get("WAREHOUSE_PATH", "./warehouse/ecom.duckdb")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+DEFAULT_WAREHOUSE_PATH = os.path.join(
+    PROJECT_ROOT, "warehouse", "ecom.duckdb"
+)
+
+WAREHOUSE_PATH = os.environ.get(
+    "WAREHOUSE_PATH",
+    DEFAULT_WAREHOUSE_PATH
+)
+
+if not os.path.isabs(WAREHOUSE_PATH):
+    WAREHOUSE_PATH = os.path.join(PROJECT_ROOT, WAREHOUSE_PATH)
+
+WAREHOUSE_PATH = os.path.normpath(WAREHOUSE_PATH)
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
 MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "minioadmin")
 MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", "minioadmin")
