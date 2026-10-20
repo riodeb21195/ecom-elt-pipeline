@@ -3,7 +3,6 @@ version: "3.9"
 services:
   mock_source_api:
     build: ./mock_source_api
-    container_name: ecom_mock_source_api
     ports:
       - "8000:8000"
     environment:
@@ -16,7 +15,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: ecom_minio
     ports:
       - "9000:9000" # API
       - "9001:9001" # Console
